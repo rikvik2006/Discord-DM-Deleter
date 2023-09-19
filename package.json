@@ -1,0 +1,23 @@
+{
+  "name": "discord-dm-deleter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "strat": "node ./dist/src/index.js",
+    "dev": "pnpm nodemon"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.1",
+    "puppeteer": "^21.2.1",
+    "puppeteer-extra": "^3.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}

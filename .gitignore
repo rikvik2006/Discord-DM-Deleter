@@ -1,0 +1,6 @@
+node_modules/
+vscode/
+
+# Build dir
+dist/
+.env
