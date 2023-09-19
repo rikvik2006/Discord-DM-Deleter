@@ -31,5 +31,17 @@ export const deleteMessages = async (page: Page) => {
 
     const userMessagesHandleElements: ElementHandle<HTMLElement>[] = await Promise.all(userMessages.map(async (message) => await page.evaluateHandle(e => e, message)))
 
+    for (let message of userMessagesHandleElements) {
+        const messageBoudingBox = await message.boundingBox()
+        if (!messageBoudingBox) continue
 
+        const x = messageBoudingBox.x + messageBoudingBox.width / 2;
+        const y = messageBoudingBox.y + messageBoudingBox.height / 2
+
+        await page.mouse.move(x, y)
+        await page.keyboard.press("ShiftLeft")
+        await page.keyboard.down("ShiftLeft");
+
+
+    }
 }
