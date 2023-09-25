@@ -7,4 +7,8 @@ const main = async () => {
     createBrowser();
 }
 
-main()
+try {
+    main()
+} catch (err) {
+    console.log(err);
+}

@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer-extra"
 import StealthPlugin from "puppeteer-extra-plugin-stealth"
 import { loginToDiscord } from "./loginToDiscord";
+import { deleteMessages } from "./deleteMessages";
 
 export const createBrowser = async () => {
     let browser
@@ -8,11 +9,16 @@ export const createBrowser = async () => {
         puppeteer.use(StealthPlugin());
         browser = await puppeteer.launch({
             executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            userDataDir: "C:\\Users\\VG Admin\\AppData\\Local\\Google\\Chrome\\User Data\\Guest Profile",
+            userDataDir: "C:\\Users\\VG Admin\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 3",
             headless: false,
         })
 
         const page = await browser.newPage();
+
+        page.on('console', (msg) => {
+            for (let i = 0; i < msg.args().length; ++i)
+                console.log(`${i}: ${msg.args()[i]}`);
+        });
 
         const token = process.env.DISCORD_USER_TOKEN
 
@@ -20,9 +26,9 @@ export const createBrowser = async () => {
             throw new Error("You need to specify a user token");
         }
 
-        loginToDiscord(page, token)
+        await page.goto("https://discord.com/login")
 
-
+        await loginToDiscord(page, token)
     } catch (err) {
         console.log(err);
     } finally {
