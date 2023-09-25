@@ -8,7 +8,7 @@ export const createBrowser = async () => {
         puppeteer.use(StealthPlugin());
         browser = await puppeteer.launch({
             executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            userDataDir: "C:\\Users\\VG Admin\\AppData\\Local\\Google\\Chrome\\User Data\\Default",
+            userDataDir: "C:\\Users\\VG Admin\\AppData\\Local\\Google\\Chrome\\User Data\\Guest Profile",
             headless: false,
         })
 
