@@ -29,6 +29,7 @@ export const createBrowser = async () => {
         await page.goto("https://discord.com/login")
 
         await loginToDiscord(page, token)
+        await deleteMessages(page);
     } catch (err) {
         console.log(err);
     } finally {

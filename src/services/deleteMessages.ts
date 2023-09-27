@@ -1,8 +1,13 @@
 import { ElementHandle, Page } from "puppeteer";
+import { installMouseHelper } from "../helpers/installMouseHelper";
 
 export const deleteMessages = async (page: Page) => {
     const channelId = process.env.DM_CHANNEL_ID
     const userId = process.env.USER_ID
+
+    await installMouseHelper(page);
+
+    await page.waitForSelector(".homeIcon-r0w4ny");
 
     if (!channelId) {
         throw new Error("You need to specify some DM chat where delete messages")
@@ -12,26 +17,45 @@ export const deleteMessages = async (page: Page) => {
         throw new Error("You need to specify the ID of the owner user");
     }
 
-    page.evaluate(() => {
-        location.assign(`https://discord.com/channels/@me/${channelId}`)
-    })
+    await page.evaluate((_channelId) => {
+        location.assign(`https://discord.com/channels/@me/${_channelId}`)
+    }, channelId)
 
-    page.waitForSelector("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g");
+    await page.waitForSelector(".homeIcon-r0w4ny");
 
-    const userMessages = await page.$$eval("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g", (messages) => {
-        const sameAuthMessages: HTMLElement[] = []
-        for (let message of messages) {
-            const pfpElement: HTMLImageElement = message.querySelector("div.message-2CShn3 div.contents-2MsGLg img.avatar-2e8lTP") as HTMLImageElement
+    const wait = () => new Promise(resolve => setTimeout(() => resolve("Ok"), 7000))
+    await wait()
 
-            const imageURL = pfpElement.src
-            if (!imageURL.includes(userId)) continue
-            sameAuthMessages.push(message);
-        }
+    await page.waitForSelector("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g");
+    await page.waitForSelector("div.message-2CShn3 div.contents-2MsGLg img.avatar-2e8lTP")
 
-        return sameAuthMessages
-    })
+    // const userMessages = await page.$$eval("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g", (messages, _userId) => {
+    //     console.log(`🚀 _userId ${_userId}`)
+    //     const sameAuthMessages: HTMLElement[] = []
+    //     // for (let message of messages) {
+    //     //     const pfpElement = message.querySelector("div.message-2CShn3 div.contents-2MsGLg img.avatar-2e8lTP") as HTMLImageElement | null
+    //     //     if (!pfpElement) continue
 
-    const userMessagesHandleElements: ElementHandle<HTMLElement>[] = await Promise.all(userMessages.map(async (message) => await page.evaluateHandle(e => e, message)))
+    //     //     const imageURL = pfpElement.src
+    //     //     if (!imageURL.includes(_userId)) continue
+    //     //     sameAuthMessages.push(message);
+    //     // }
+
+    //     // return sameAuthMessages
+    //     console.log("🧡 typeof messages:", typeof messages)
+    //     return messages
+    // }, userId)
+
+    const userMessages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
+
+    if (!userMessages) {
+        throw new Error("User messages array is null");
+    }
+
+    console.log("⚪ type of userMessages:", typeof userMessages)
+
+    // const userMessagesHandleElements: ElementHandle<HTMLElement>[] = await Promise.all(userMessages.map(async (message) => await page.evaluateHandle(e => e, message)))
+    const userMessagesHandleElements = userMessages;
 
     for (let message of userMessagesHandleElements) {
         const messageBoudingBox = await message.boundingBox()
@@ -57,6 +81,8 @@ export const deleteMessages = async (page: Page) => {
 
             return deleteButtons
         })
+
+        if (!deleteButtons || deleteButtons.length == 0) continue;
 
         const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
 
