@@ -65,26 +65,32 @@ export const deleteMessages = async (page: Page) => {
         const messageY = messageBoudingBox.y + messageBoudingBox.height / 2
 
         await page.mouse.move(messageX, messageY)
-        await page.keyboard.press("ShiftLeft")
+        // await page.keyboard.press("ShiftLeft")
         await page.keyboard.down("ShiftLeft");
 
-        const deleteButtons: HTMLDivElement[] = await message.$$eval(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh", (buttons) => {
-            const deleteButtons: HTMLDivElement[] = []
+        // const deleteButtons: HTMLDivElement[] = await message.$$eval(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh", (buttons) => {
+        //     const deleteButtons: HTMLDivElement[] = []
 
-            for (let button of buttons) {
-                const buttonClassList: string[] = Array.from(button.classList);
+        //     for (let button of buttons) {
+        //         const buttonClassList: string[] = Array.from(button.classList);
 
-                if (!buttonClassList.includes("dangerous-Y36ifs")) continue;
+        //         if (!buttonClassList.includes("dangerous-Y36ifs")) continue;
 
-                deleteButtons.push(button);
-            }
+        //         deleteButtons.push(button);
+        //     }
 
-            return deleteButtons
-        })
+        //     return deleteButtons
+        // })
 
-        if (!deleteButtons || deleteButtons.length == 0) continue;
+        const deleteButtons = await message.$$(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh.dangerous-Y36ifs")
 
-        const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
+        if (!deleteButtons || deleteButtons.length == 0) {
+            console.log("⚠️ Not a message from the user, skipping...")
+            continue;
+        };
+
+        // const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
+        const deleteButtonsHandleElements = deleteButtons;
 
         for (let deleteButton of deleteButtonsHandleElements) {
             const deleteButtonBoundingBox = await deleteButton.boundingBox();
@@ -95,6 +101,9 @@ export const deleteMessages = async (page: Page) => {
 
             await page.mouse.move(x, y);
             await page.mouse.click(x, y);
+
+            const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
+            await wait(1000);
         }
     }
 }
