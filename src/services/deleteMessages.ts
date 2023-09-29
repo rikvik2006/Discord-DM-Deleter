@@ -23,8 +23,8 @@ export const deleteMessages = async (page: Page) => {
 
     await page.waitForSelector(".homeIcon-r0w4ny");
 
-    const wait = () => new Promise(resolve => setTimeout(() => resolve("Ok"), 7000))
-    await wait()
+    const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms))
+    await wait(5000)
 
     await page.waitForSelector("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g");
     await page.waitForSelector("div.message-2CShn3 div.contents-2MsGLg img.avatar-2e8lTP")
@@ -79,11 +79,22 @@ export const deleteMessages = async (page: Page) => {
 
             await page.mouse.move(messageX, messageY)
             await page.keyboard.down("ShiftLeft");
+            await page.keyboard.up("ShiftLeft");
+            await page.keyboard.down("ShiftLeft");
+
+            // Add some orizzontal noise to the mouse pointer
+            const noise = Math.round(Math.random() * 5)
+            await page.mouse.move(messageX + noise, messageY)
+            await page.mouse.move(messageX - noise, messageY);
 
             const deleteButtons = await message.$$(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh.dangerous-Y36ifs")
 
             if (!deleteButtons || deleteButtons.length == 0) {
                 console.log("⚠️ Not a message from the user, skipping...")
+                await page.keyboard.up("ShiftLeft");
+                await wait(500);
+
+                if (messages.length == parseInt(index) + 1) continue;
                 const previousMessage = messages[parseInt(index) + 1]
                 const previousMessageBoundingBox = await previousMessage.boundingBox()
 
@@ -102,7 +113,7 @@ export const deleteMessages = async (page: Page) => {
                     console.log(`⚪ ${_deltaHeight}`)
                 }, deltaHeight)
 
-                continue;
+                continue; // <-- Questo cotinue
             };
 
             // const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
@@ -117,6 +128,7 @@ export const deleteMessages = async (page: Page) => {
 
                 await page.mouse.move(x, y);
                 await page.mouse.click(x, y);
+                await page.keyboard.up("ShiftLeft");
 
                 const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
                 await wait(1000);
