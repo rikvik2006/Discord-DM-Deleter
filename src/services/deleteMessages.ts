@@ -46,64 +46,90 @@ export const deleteMessages = async (page: Page) => {
     //     return messages
     // }, userId)
 
-    const userMessages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
+    // Fetching the loaded messgaes
 
-    if (!userMessages) {
-        throw new Error("User messages array is null");
-    }
+    let allMessageDeleted = false
 
-    console.log("⚪ type of userMessages:", typeof userMessages)
+    while (!allMessageDeleted) {
+        let messages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
 
-    // const userMessagesHandleElements: ElementHandle<HTMLElement>[] = await Promise.all(userMessages.map(async (message) => await page.evaluateHandle(e => e, message)))
-    const userMessagesHandleElements = userMessages;
+        if (!messages) {
+            throw new Error("User messages array is null");
+        }
 
-    for (let message of userMessagesHandleElements) {
-        const messageBoudingBox = await message.boundingBox()
-        if (!messageBoudingBox) continue
+        if (messages.length == 0) {
+            return;
+        }
 
-        const messageX = messageBoudingBox.x + messageBoudingBox.width / 2;
-        const messageY = messageBoudingBox.y + messageBoudingBox.height / 2
+        console.log("⚪ type of userMessages:", typeof messages)
 
-        await page.mouse.move(messageX, messageY)
-        // await page.keyboard.press("ShiftLeft")
-        await page.keyboard.down("ShiftLeft");
+        // const userMessagesHandleElements: ElementHandle<HTMLElement>[] = await Promise.all(userMessages.map(async (message) => await page.evaluateHandle(e => e, message)))
 
-        // const deleteButtons: HTMLDivElement[] = await message.$$eval(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh", (buttons) => {
-        //     const deleteButtons: HTMLDivElement[] = []
+        // Start from the bottom of the array
+        messages.reverse();
 
-        //     for (let button of buttons) {
-        //         const buttonClassList: string[] = Array.from(button.classList);
+        // for every message, hover over it and click the delete button
+        for (let index in messages) {
+            const message = messages[index];
+            const messageBoudingBox = await message.boundingBox()
+            if (!messageBoudingBox) continue
 
-        //         if (!buttonClassList.includes("dangerous-Y36ifs")) continue;
+            const messageX = messageBoudingBox.x + messageBoudingBox.width / 2;
+            const messageY = messageBoudingBox.y + messageBoudingBox.height / 2
 
-        //         deleteButtons.push(button);
-        //     }
+            await page.mouse.move(messageX, messageY)
+            await page.keyboard.down("ShiftLeft");
 
-        //     return deleteButtons
-        // })
+            const deleteButtons = await message.$$(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh.dangerous-Y36ifs")
 
-        const deleteButtons = await message.$$(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh.dangerous-Y36ifs")
+            if (!deleteButtons || deleteButtons.length == 0) {
+                console.log("⚠️ Not a message from the user, skipping...")
+                const previousMessage = messages[parseInt(index) + 1]
+                const previousMessageBoundingBox = await previousMessage.boundingBox()
 
-        if (!deleteButtons || deleteButtons.length == 0) {
-            console.log("⚠️ Not a message from the user, skipping...")
-            continue;
-        };
+                if (!previousMessageBoundingBox) continue;
 
-        // const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
-        const deleteButtonsHandleElements = deleteButtons;
+                const previousMessageY = previousMessageBoundingBox.y + previousMessageBoundingBox.height / 2
 
-        for (let deleteButton of deleteButtonsHandleElements) {
-            const deleteButtonBoundingBox = await deleteButton.boundingBox();
-            if (!deleteButtonBoundingBox) continue;
+                const deltaHeight = messageY - previousMessageY
+                console.log("🚀 ~ file: deleteMessages.ts:95 ~ deleteMessages ~ deltaHeight:", deltaHeight)
 
-            const x = deleteButtonBoundingBox.x + deleteButtonBoundingBox.width / 2;
-            const y = deleteButtonBoundingBox.y + deleteButtonBoundingBox.height / 2;
+                page.evaluate((_deltaHeight) => {
+                    const scroller = document.querySelector<HTMLElement>(".scroller-kQBbkU")
+                    if (!scroller) return;
 
-            await page.mouse.move(x, y);
-            await page.mouse.click(x, y);
+                    scroller.scrollBy(0, -_deltaHeight);
+                    console.log(`⚪ ${_deltaHeight}`)
+                }, deltaHeight)
 
-            const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
-            await wait(1000);
+                continue;
+            };
+
+            // const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
+            const deleteButtonsHandleElements = deleteButtons;
+
+            for (let deleteButton of deleteButtonsHandleElements) {
+                const deleteButtonBoundingBox = await deleteButton.boundingBox();
+                if (!deleteButtonBoundingBox) continue;
+
+                const x = deleteButtonBoundingBox.x + deleteButtonBoundingBox.width / 2;
+                const y = deleteButtonBoundingBox.y + deleteButtonBoundingBox.height / 2;
+
+                await page.mouse.move(x, y);
+                await page.mouse.click(x, y);
+
+                const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
+                await wait(1000);
+            }
+        }
+
+        const updatedMessages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
+        updatedMessages.reverse();
+
+        if (updatedMessages.length == 0) {
+            allMessageDeleted = true
+        } else if (messages == updatedMessages) {
+            allMessageDeleted = true
         }
     }
 }
