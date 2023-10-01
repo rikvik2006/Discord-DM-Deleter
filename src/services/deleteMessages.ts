@@ -50,7 +50,9 @@ export const deleteMessages = async (page: Page) => {
 
     let allMessageDeleted = false
 
+    let oldMessages: ElementHandle<HTMLLIElement>[] = []
     while (!allMessageDeleted) {
+        console.log("🔄️ While restarted")
         let messages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
 
         if (!messages) {
@@ -67,10 +69,16 @@ export const deleteMessages = async (page: Page) => {
 
         // Start from the bottom of the array
         messages.reverse();
+        messages = messages
+            .filter(message => !oldMessages.includes(message))
+            .concat(oldMessages.filter(oldMessages => !messages.includes(oldMessages)))
+        oldMessages = messages
 
         // for every message, hover over it and click the delete button
         for (let index in messages) {
             const message = messages[index];
+            const channelAndMessageId = message.evaluate((msg) => msg.classList[0].split("chat-messages-")[0].split("-"))
+
             const messageBoudingBox = await message.boundingBox()
             if (!messageBoudingBox) continue
 
@@ -78,8 +86,7 @@ export const deleteMessages = async (page: Page) => {
             const messageY = messageBoudingBox.y + messageBoudingBox.height / 2
 
             await page.mouse.move(messageX, messageY)
-            await page.keyboard.down("ShiftLeft");
-            await page.keyboard.up("ShiftLeft");
+            await wait(500);  // Adding some delay to give time to discord to register the hover event
             await page.keyboard.down("ShiftLeft");
 
             // Add some orizzontal noise to the mouse pointer
@@ -105,7 +112,7 @@ export const deleteMessages = async (page: Page) => {
                 const deltaHeight = messageY - previousMessageY
                 console.log("🚀 ~ file: deleteMessages.ts:95 ~ deleteMessages ~ deltaHeight:", deltaHeight)
 
-                page.evaluate((_deltaHeight) => {
+                await page.evaluate((_deltaHeight) => {
                     const scroller = document.querySelector<HTMLElement>(".scroller-kQBbkU")
                     if (!scroller) return;
 
@@ -113,7 +120,7 @@ export const deleteMessages = async (page: Page) => {
                     console.log(`⚪ ${_deltaHeight}`)
                 }, deltaHeight)
 
-                continue; // <-- Questo cotinue
+                continue;
             };
 
             // const deleteButtonsHandleElements: ElementHandle<HTMLDivElement>[] = await Promise.all(deleteButtons.map(async (deleteButton) => await page.evaluateHandle(e => e, deleteButton)))
@@ -131,7 +138,7 @@ export const deleteMessages = async (page: Page) => {
                 await page.keyboard.up("ShiftLeft");
 
                 const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
-                await wait(1000);
+                await wait(500);
             }
         }
 
@@ -140,8 +147,10 @@ export const deleteMessages = async (page: Page) => {
 
         if (updatedMessages.length == 0) {
             allMessageDeleted = true
+            console.log("🔄️ Stopping the while loop, for updatedMessagesLength equal to ZERO")
         } else if (messages == updatedMessages) {
             allMessageDeleted = true
+            console.log("🔄️ Stopping the while loop, for updatedMessagesLength equal  to messages")
         }
     }
 }
