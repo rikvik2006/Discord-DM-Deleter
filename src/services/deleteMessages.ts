@@ -50,7 +50,8 @@ export const deleteMessages = async (page: Page) => {
 
     let allMessageDeleted = false
 
-    let oldMessages: ElementHandle<HTMLLIElement>[] = []
+    // let oldMessages: ElementHandle<HTMLLIElement>[] = []
+    let lastMessage: ElementHandle<HTMLLIElement> | null = null
     while (!allMessageDeleted) {
         console.log("🔄️ While restarted")
         let messages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
@@ -69,15 +70,34 @@ export const deleteMessages = async (page: Page) => {
 
         // Start from the bottom of the array
         messages.reverse();
-        messages = messages
-            .filter(message => !oldMessages.includes(message))
-            .concat(oldMessages.filter(oldMessages => !messages.includes(oldMessages)))
-        oldMessages = messages
+        // messages = messages
+        //     .filter(message => !oldMessages.includes(message))
+        //     .concat(oldMessages.filter(oldMessages => !messages.includes(oldMessages)))
+        // oldMessages = messages
+
+        if (lastMessage) {
+            const messagesHandle = await lastMessage.evaluate((element) => {
+                console.log(`🧬 typeof element: ${typeof element}`)
+                const elements: HTMLLIElement[] = [];
+                let currentElement = element.previousElementSibling;
+                while (currentElement) {
+                    if (currentElement.tagName === "LI") {
+                        const liElement: HTMLLIElement = currentElement as HTMLLIElement
+                        elements.push(liElement);
+                    }
+                    currentElement = currentElement.previousElementSibling;
+                }
+                return elements;
+            });
+
+            messages = await Promise.all(messagesHandle.map(message => page.evaluateHandle(e => e, message)))
+        }
 
         // for every message, hover over it and click the delete button
         for (let index in messages) {
             const message = messages[index];
-            const channelAndMessageId = message.evaluate((msg) => msg.classList[0].split("chat-messages-")[0].split("-"))
+            lastMessage = message
+            const channelAndMessageId = await message.evaluate((msg) => msg.classList[0].split("chat-messages-")[0].split("-"))
 
             const messageBoudingBox = await message.boundingBox()
             if (!messageBoudingBox) continue
@@ -86,7 +106,7 @@ export const deleteMessages = async (page: Page) => {
             const messageY = messageBoudingBox.y + messageBoudingBox.height / 2
 
             await page.mouse.move(messageX, messageY)
-            await wait(500);  // Adding some delay to give time to discord to register the hover event
+            await wait(250);  // Adding some delay to give time to discord to register the hover event
             await page.keyboard.down("ShiftLeft");
 
             // Add some orizzontal noise to the mouse pointer
@@ -99,7 +119,7 @@ export const deleteMessages = async (page: Page) => {
             if (!deleteButtons || deleteButtons.length == 0) {
                 console.log("⚠️ Not a message from the user, skipping...")
                 await page.keyboard.up("ShiftLeft");
-                await wait(500);
+                // await wait(500);
 
                 if (messages.length == parseInt(index) + 1) continue;
                 const previousMessage = messages[parseInt(index) + 1]
