@@ -2,6 +2,7 @@ import puppeteer from "puppeteer-extra"
 import StealthPlugin from "puppeteer-extra-plugin-stealth"
 import { loginToDiscord } from "./loginToDiscord";
 import { deleteMessages } from "./deleteMessages";
+import { deleteMessagesElementSibling } from "./deleteMessagesElementSibling";
 
 export const createBrowser = async () => {
     let browser
@@ -29,7 +30,8 @@ export const createBrowser = async () => {
         await page.goto("https://discord.com/login")
 
         await loginToDiscord(page, token)
-        await deleteMessages(page);
+        // await deleteMessages(page);
+        await deleteMessagesElementSibling(page);
     } catch (err) {
         console.log(err);
     } finally {
