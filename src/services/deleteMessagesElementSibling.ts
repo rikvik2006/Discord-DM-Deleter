@@ -43,22 +43,40 @@ export const deleteMessagesElementSibling = async (page: Page) => {
 
     let message: ElementHandle<HTMLLIElement> | null = messages[0]
     while (message) {
-        const getPreviouseMessage = async (message: ElementHandle<HTMLLIElement>): Promise<HTMLLIElement | null> => {
-            const previousMessage: HTMLLIElement | null = await message.evaluate((message: HTMLLIElement) => {
-                const previousMessage = message.previousElementSibling;
-                console.log(`🪫 previus message ${previousMessage}`);
-                if (!previousMessage) return null;
-                if (previousMessage.tagName !== "LI") return null;
-                console.log("🪫 previus message is LI");
-                // message.style.border = "1px solid red";
-                // (previousMessage as HTMLLIElement).style.border = "1px solid blue";
+        const getPreviouseMessage = async (message: ElementHandle<HTMLLIElement>): Promise<ElementHandle<HTMLLIElement> | null> => {
+            //TODO:  Fix with an evaluateHandle, not an evaluate, because the element is not serializable
+            const previousMessage: ElementHandle<Element> | JSHandle<null> = await message.evaluateHandle((message: HTMLLIElement) => {
+                try {
+                    // debugger;
+                    let previousMessage = message.previousElementSibling;
+                    if (!previousMessage) return null;
+                    // not(previousMessage) or not(previousMessage.tagName == "LI")
+                    while (previousMessage.tagName != "LI") {
+                        console.log(`🪫 previus message ${previousMessage}`);
+                        previousMessage = previousMessage.previousElementSibling;
+                        if (!previousMessage) return null;
+                    }
 
-                const previousMessageHTMLLiElement = previousMessage as HTMLLIElement;
-                return previousMessageHTMLLiElement;
+                    console.log("🪫 previus message is LI");
+                    message.style.border = "1px solid red";
+                    // (previousMessage as HTMLLIElement).style.border = "1px solid blue";
+
+                    // const previousMessageHTMLLiElement = previousMessage as HTMLLIElement;
+                    // return previousMessageHTMLLiElement;
+                    return previousMessage;
+                } catch (err) {
+                    console.log("❌🪫 callback error");
+                    return null;
+                }
             });
 
-            return previousMessage;
-        };
+            // if type is JSHandle<null> return null, else return HTMLLIElement
+            if (previousMessage.asElement() == null) return null;
+            // return previousMessage.asElement() as HTMLLIElement;
+            const previousMessageHandleElement = previousMessage.asElement() as ElementHandle<HTMLLIElement>;
+            return previousMessageHandleElement;
+        }
+
 
 
         const messageBoudingBox = await message.boundingBox()
@@ -93,8 +111,8 @@ export const deleteMessagesElementSibling = async (page: Page) => {
                 continue;
             }
 
-            const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
-
+            // const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
+            const previousMessageHandleElement: ElementHandle<HTMLLIElement> = previousMessage;
             const previousMessageBoundingBox = await previousMessageHandleElement.boundingBox()
 
             if (!previousMessageBoundingBox) continue;
@@ -112,21 +130,14 @@ export const deleteMessagesElementSibling = async (page: Page) => {
                 console.log(`⚪ ${_deltaHeight}`)
             }, deltaHeight)
 
+            // TODO: Before continue, update the message variable with the previous message
+            message = previousMessageHandleElement;
             continue;
         };
 
         // While condition update
         const previousMessage = await getPreviouseMessage(message);
         console.log("🚀 ~ file: deleteMessagesElementSibling.ts:119 ~ deleteMessagesElementSibling ~ previousMessage:", previousMessage)
-
-        if (!previousMessage) {
-            message = null;
-            continue;
-        }
-
-        const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
-        message = previousMessageHandleElement;
-
 
         const deleteButtonsHandleElements = deleteButtons;
 
@@ -144,5 +155,14 @@ export const deleteMessagesElementSibling = async (page: Page) => {
             const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
             await wait(500);
         }
+
+        if (!previousMessage) {
+            message = null;
+            continue;
+        }
+
+        // const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
+        const previousMessageHandleElement: ElementHandle<HTMLLIElement> = previousMessage;
+        message = previousMessageHandleElement;
     }
 }
