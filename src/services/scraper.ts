@@ -12,6 +12,7 @@ export const createBrowser = async () => {
             executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
             userDataDir: "C:\\Users\\VG Admin\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 3",
             headless: false,
+            devtools: true,
         })
 
         const page = await browser.newPage();

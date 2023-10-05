@@ -44,16 +44,21 @@ export const deleteMessagesElementSibling = async (page: Page) => {
     let message: ElementHandle<HTMLLIElement> | null = messages[0]
     while (message) {
         const getPreviouseMessage = async (message: ElementHandle<HTMLLIElement>): Promise<HTMLLIElement | null> => {
-            const previousMessage: HTMLLIElement | null = await message.evaluate((message: Element) => {
+            const previousMessage: HTMLLIElement | null = await message.evaluate((message: HTMLLIElement) => {
                 const previousMessage = message.previousElementSibling;
+                console.log(`🪫 previus message ${previousMessage}`);
                 if (!previousMessage) return null;
                 if (previousMessage.tagName !== "LI") return null;
+                console.log("🪫 previus message is LI");
+                // message.style.border = "1px solid red";
+                // (previousMessage as HTMLLIElement).style.border = "1px solid blue";
 
-                return previousMessage as HTMLLIElement;
-            })
+                const previousMessageHTMLLiElement = previousMessage as HTMLLIElement;
+                return previousMessageHTMLLiElement;
+            });
 
             return previousMessage;
-        }
+        };
 
 
         const messageBoudingBox = await message.boundingBox()
@@ -81,6 +86,7 @@ export const deleteMessagesElementSibling = async (page: Page) => {
             // const previousMessage = messages[parseInt(index) + 1]
 
             const previousMessage = await getPreviouseMessage(message);
+            console.log("🚀 ~ file: deleteMessagesElementSibling.ts:88 ~ deleteMessagesElementSibling ~ previousMessage:", previousMessage)
 
             if (!previousMessage) {
                 message = null;
@@ -109,6 +115,18 @@ export const deleteMessagesElementSibling = async (page: Page) => {
             continue;
         };
 
+        // While condition update
+        const previousMessage = await getPreviouseMessage(message);
+        console.log("🚀 ~ file: deleteMessagesElementSibling.ts:119 ~ deleteMessagesElementSibling ~ previousMessage:", previousMessage)
+
+        if (!previousMessage) {
+            message = null;
+            continue;
+        }
+
+        const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
+        message = previousMessageHandleElement;
+
 
         const deleteButtonsHandleElements = deleteButtons;
 
@@ -126,16 +144,5 @@ export const deleteMessagesElementSibling = async (page: Page) => {
             const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
             await wait(500);
         }
-
-        // While condition update
-        const previousMessage = await getPreviouseMessage(message);
-
-        if (!previousMessage) {
-            message = null;
-            continue;
-        }
-
-        const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
-        message = previousMessageHandleElement;
     }
 }
