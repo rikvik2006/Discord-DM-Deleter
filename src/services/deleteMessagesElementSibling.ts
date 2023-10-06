@@ -1,8 +1,7 @@
 import { ElementHandle, JSHandle, Page } from "puppeteer";
 import { installMouseHelper } from "../helpers/installMouseHelper";
 
-export const deleteMessagesElementSibling = async (page: Page) => {
-    const channelId = process.env.DM_CHANNEL_ID
+export const deleteMessagesElementSibling = async (page: Page, channelId: string) => {
     const userId = process.env.USER_ID
 
     await installMouseHelper(page);
@@ -44,10 +43,8 @@ export const deleteMessagesElementSibling = async (page: Page) => {
     let message: ElementHandle<HTMLLIElement> | null = messages[0]
     while (message) {
         const getPreviouseMessage = async (message: ElementHandle<HTMLLIElement>): Promise<ElementHandle<HTMLLIElement> | null> => {
-            //TODO:  Fix with an evaluateHandle, not an evaluate, because the element is not serializable
             const previousMessage: ElementHandle<Element> | JSHandle<null> = await message.evaluateHandle((message: HTMLLIElement) => {
                 try {
-                    // debugger;
                     let previousMessage = message.previousElementSibling;
                     if (!previousMessage) return null;
                     // not(previousMessage) or not(previousMessage.tagName == "LI")
@@ -59,10 +56,6 @@ export const deleteMessagesElementSibling = async (page: Page) => {
 
                     console.log("🪫 previus message is LI");
                     message.style.border = "1px solid red";
-                    // (previousMessage as HTMLLIElement).style.border = "1px solid blue";
-
-                    // const previousMessageHTMLLiElement = previousMessage as HTMLLIElement;
-                    // return previousMessageHTMLLiElement;
                     return previousMessage;
                 } catch (err) {
                     console.log("❌🪫 callback error");
@@ -98,10 +91,6 @@ export const deleteMessagesElementSibling = async (page: Page) => {
         if (!deleteButtons || deleteButtons.length == 0) {
             console.log("⚠️ Not a message from the user, skipping...")
             await page.keyboard.up("ShiftLeft");
-            // await wait(500);
-
-            // if (messages.length == parseInt(index) + 1) continue;
-            // const previousMessage = messages[parseInt(index) + 1]
 
             const previousMessage = await getPreviouseMessage(message);
             console.log("🚀 ~ file: deleteMessagesElementSibling.ts:88 ~ deleteMessagesElementSibling ~ previousMessage:", previousMessage)
@@ -130,7 +119,6 @@ export const deleteMessagesElementSibling = async (page: Page) => {
                 console.log(`⚪ ${_deltaHeight}`)
             }, deltaHeight)
 
-            // TODO: Before continue, update the message variable with the previous message
             message = previousMessageHandleElement;
             continue;
         };
