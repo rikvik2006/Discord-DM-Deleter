@@ -3,6 +3,7 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth"
 import { loginToDiscord } from "./loginToDiscord";
 import { deleteMessages } from "./deleteMessages";
 import { deleteMessagesElementSibling } from "./deleteMessagesElementSibling";
+import { getDMChannelsIds } from "./getDMChannels";
 
 export const createBrowser = async () => {
     let browser
@@ -32,7 +33,11 @@ export const createBrowser = async () => {
 
         await loginToDiscord(page, token)
         // await deleteMessages(page);
-        await deleteMessagesElementSibling(page);
+        const channelsIds = await getDMChannelsIds(token)
+
+        for (let channelId of channelsIds) {
+            await deleteMessagesElementSibling(page, channelId);
+        }
     } catch (err) {
         console.log(err);
     } finally {
