@@ -32,6 +32,7 @@ You must specify the executable path and user data directory of the browser that
 
 ## Usage
 
+Build the application with `npm run build` or with `pnpm build`.
 To start the application, run `npm start` or `pnpm dev`.
 
 ### Deleting DMs
