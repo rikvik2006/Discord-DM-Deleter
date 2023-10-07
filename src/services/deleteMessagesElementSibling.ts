@@ -47,7 +47,8 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
                 try {
                     let previousMessage = message.previousElementSibling;
                     if (!previousMessage) return null;
-                    // not(previousMessage) or not(previousMessage.tagName == "LI")
+
+                    // not(previousMessage.tagName == "LI")
                     while (previousMessage.tagName != "LI") {
                         console.log(`🪫 previus message ${previousMessage}`);
                         previousMessage = previousMessage.previousElementSibling;
@@ -65,7 +66,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
 
             // if type is JSHandle<null> return null, else return HTMLLIElement
             if (previousMessage.asElement() == null) return null;
-            // return previousMessage.asElement() as HTMLLIElement;
             const previousMessageHandleElement = previousMessage.asElement() as ElementHandle<HTMLLIElement>;
             return previousMessageHandleElement;
         }
@@ -100,7 +100,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
                 continue;
             }
 
-            // const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
             const previousMessageHandleElement: ElementHandle<HTMLLIElement> = previousMessage;
             const previousMessageBoundingBox = await previousMessageHandleElement.boundingBox()
 
@@ -141,7 +140,10 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             await page.keyboard.up("ShiftLeft");
 
             const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
-            await wait(500);
+            const minMilliseconds = 1500
+            const maxMilliseconds = 10000
+            const milliseconds = Math.floor(Math.random() * (maxMilliseconds - minMilliseconds + 1)) + minMilliseconds
+            await wait(milliseconds);
         }
 
         if (!previousMessage) {
@@ -149,7 +151,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             continue;
         }
 
-        // const previousMessageHandleElement: ElementHandle<HTMLLIElement> = await page.evaluateHandle(_previousMessage => _previousMessage, previousMessage)
         const previousMessageHandleElement: ElementHandle<HTMLLIElement> = previousMessage;
         message = previousMessageHandleElement;
     }
