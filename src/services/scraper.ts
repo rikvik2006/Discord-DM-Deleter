@@ -9,6 +9,8 @@ export const createBrowser = async () => {
     const isProductionEnv = process.env.PRODUCTION
     const executablePath = process.env.EXECUTABLE_PATH
     const userDataDir = process.env.USER_DATA_DIR
+    let excludeChannelsIds = process.env.EXCLUDE_CHANNELS_IDS
+
     if (isProductionEnv == undefined) {
         throw new Error("You need to specirty a deploymed status (Production or Developing). Expected: Boolean")
     }
@@ -19,6 +21,10 @@ export const createBrowser = async () => {
 
     if (!userDataDir) {
         throw new Error("You need to specify a user data dir")
+    }
+
+    if (!excludeChannelsIds) {
+        excludeChannelsIds = "";
     }
 
     const isProduction = isProductionEnv == "true" ? true : false
@@ -50,7 +56,14 @@ export const createBrowser = async () => {
         await loginToDiscord(page, token)
         const channelsIds = await getDMChannelsIds(token)
 
+        const excludeChannelsIdsArray = excludeChannelsIds.split(",");
+
         for (let channelId of channelsIds) {
+            if (excludeChannelsIdsArray.includes(channelId)) {
+                console.log(`*️⃣ Excluding channel id ${channelId}`)
+                continue
+            }
+
             await deleteMessagesElementSibling(page, channelId);
         }
     } catch (err) {
