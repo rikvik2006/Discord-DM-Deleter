@@ -18,6 +18,7 @@ This application allows you to delete direct messages (DMs) that you have sent t
 | `PRODUCTION` | Whether or not the application is running in production. |
 | `EXECUTABLE_PATH` | The path to the executable of the browser that you want to use. |
 | `USER_DATA_DIR` | The path to the user data directory of the browser that you want to use. |
+| `EXCLUDE_CHANNELS_IDS` | The IDs of the DM channels that you want to exclude from deletion. |
 
 #### Executable Paths and User Data Directories
 
