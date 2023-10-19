@@ -1,12 +1,13 @@
 import { ElementHandle, JSHandle, Page } from "puppeteer";
 import { installMouseHelper } from "../helpers/installMouseHelper";
 
-export const deleteMessagesElementSibling = async (page: Page, channelId: string) => {
+export const deleteMessagesElementSibling = async (page: Page, channelId: string): Promise<number> => {
     const userId = process.env.USER_ID
+    let totalDeletedMessages = 0
 
     await installMouseHelper(page);
 
-    await page.waitForSelector(".homeIcon-r0w4ny");
+    await page.waitForSelector(".childWrapper-1j_1ub");
 
     if (!channelId) {
         throw new Error("You need to specify some DM chat where delete messages")
@@ -20,7 +21,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
         location.assign(`https://discord.com/channels/@me/${_channelId}`)
     }, channelId)
 
-    await page.waitForSelector(".homeIcon-r0w4ny");
+    await page.waitForSelector(".childWrapper-1j_1ub");
 
     const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms))
     await wait(5000)
@@ -36,7 +37,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
     }
 
     if (messages.length == 0) {
-        return;
+        return totalDeletedMessages;
     }
     messages.reverse();
 
@@ -69,8 +70,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             const previousMessageHandleElement = previousMessage.asElement() as ElementHandle<HTMLLIElement>;
             return previousMessageHandleElement;
         }
-
-
 
         const messageBoudingBox = await message.boundingBox()
         if (!messageBoudingBox) continue
@@ -138,6 +137,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             await page.mouse.move(x, y);
             await page.mouse.click(x, y);
             await page.keyboard.up("ShiftLeft");
+            totalDeletedMessages++
 
             const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
             const minMilliseconds = 1500
@@ -154,4 +154,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
         const previousMessageHandleElement: ElementHandle<HTMLLIElement> = previousMessage;
         message = previousMessageHandleElement;
     }
+
+    return totalDeletedMessages
 }
