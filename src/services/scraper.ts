@@ -4,6 +4,7 @@ import { EmbedBuilder } from "@discordjs/builders";
 import { loginToDiscord } from "./loginToDiscord";
 import { deleteMessagesElementSibling } from "./deleteMessagesElementSibling";
 import { getDMChannelsIds } from "./getDMChannels";
+import axios from "axios";
 
 export const createBrowser = async () => {
     let browser
@@ -82,10 +83,52 @@ export const createBrowser = async () => {
             totalChatDeleted++
             totalDeletedMessages += chatDeletedMessages
         }
+
+        const table = {
+            "🔢 Deleted messages": totalDeletedMessages.toString(),
+            "🔢 Deleted chats": totalChatDeleted.toString()
+        }
+
+        if (errorLogsWebhook && statsLogsWebhook) {
+            console.log(`✅ Finished \n🔢Total deleted messages: ${totalDeletedMessages}\n🔢 Deleted chats: ${totalChatDeleted}`)
+            console.table(table, ["Type", "Quantity"])
+
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("❌ An erorr accured")
+                .setAuthor({ name: deleterInstanceName, iconURL: "https://imgur.com/ishtmHQ.png" })
+                .setTimestamp()
+
+            const statsEmbed = new EmbedBuilder()
+                .setTitle("🔢 Last deletion stats")
+                .setAuthor({ name: deleterInstanceName, iconURL: "https://imgur.com/ishtmHQ.png" })
+                .setDescription("Generation succesfully finished, sending deletaion stats")
+                .addFields(
+                    { name: "Deleated messages", value: totalDeletedMessages.toString() },
+                    { name: "Deleated chats", value: totalChatDeleted.toString() }
+                )
+                .setTimestamp()
+
+            await axios.post(errorLogsWebhook, {
+                embeds: [errorEmbed]
+            });
+            await axios.post(statsLogsWebhook, {
+                embeds: [statsEmbed]
+            });
+        } else {
+            console.log(`✅ Finished (not sending embed) \n🔢 Total deleted messages: ${totalDeletedMessages}\n🔢 Deleted chats: ${totalChatDeleted}`)
+            console.table(table, ["Type", "Quantity"])
+        }
     } catch (err) {
         console.log(err);
 
-        if (!errorLogsWebhook && !statsLogsWebhook) {
+        const table = {
+            "🔢 Deleted messages": totalDeletedMessages.toString(),
+            "🔢 Deleted chats": totalChatDeleted.toString()
+        }
+        if (errorLogsWebhook && statsLogsWebhook) {
+            console.log(`❌ Crashed \n🔢Total deleted messages: ${totalDeletedMessages}\n🔢 Deleted chats: ${totalChatDeleted}`)
+            console.table(table, ["Type", "Quantity"])
+
             const errorEmbed = new EmbedBuilder()
                 .setTitle("❌ An erorr accured")
                 .setAuthor({ name: deleterInstanceName, iconURL: "https://imgur.com/ishtmHQ.png" })
@@ -100,13 +143,15 @@ export const createBrowser = async () => {
                     { name: "Deleated chats", value: totalChatDeleted.toString() }
                 )
                 .setTimestamp()
-        } else {
-            console.log(`❌ Crashed(not seding embed) \n🔢Total deleted messages: ${totalDeletedMessages}\nDeleted chats: ${totalChatDeleted}`)
 
-            const table = {
-                "🔢 Deleted messages": totalDeletedMessages,
-                "🔢 Deleted chats": totalChatDeleted
-            }
+            await axios.post(errorLogsWebhook, {
+                embeds: [errorEmbed]
+            });
+            await axios.post(statsLogsWebhook, {
+                embeds: [statsEmbed]
+            });
+        } else {
+            console.log(`❌ Crashed (not sending embed) \n🔢Total deleted messages: ${totalDeletedMessages}\n🔢 Deleted chats: ${totalChatDeleted}`)
             console.table(table, ["Type", "Quantity"])
         }
 
