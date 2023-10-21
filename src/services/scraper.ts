@@ -85,8 +85,8 @@ export const createBrowser = async () => {
         }
 
         const table = {
-            "🔢 Deleted messages": totalDeletedMessages.toString(),
-            "🔢 Deleted chats": totalChatDeleted.toString()
+            "🔢 Deleted messages": totalDeletedMessages,
+            "🔢 Deleted chats": totalChatDeleted
         }
 
         if (errorLogsWebhook && statsLogsWebhook) {
@@ -114,8 +114,8 @@ export const createBrowser = async () => {
         console.log(err);
 
         const table = {
-            "🔢 Deleted messages": totalDeletedMessages.toString(),
-            "🔢 Deleted chats": totalChatDeleted.toString()
+            "🔢 Deleted messages": totalDeletedMessages,
+            "🔢 Deleted chats": totalChatDeleted
         }
         if (errorLogsWebhook && statsLogsWebhook) {
             console.log(`❌ Crashed \n🔢Total deleted messages: ${totalDeletedMessages}\n🔢 Deleted chats: ${totalChatDeleted}`)
