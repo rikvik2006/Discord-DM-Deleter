@@ -51,16 +51,16 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
 
                     // not(previousMessage.tagName == "LI")
                     while (previousMessage.tagName != "LI") {
-                        console.log(`🪫 previus message ${previousMessage}`);
+                        // console.log(`🪫 previus message ${previousMessage}`);
                         previousMessage = previousMessage.previousElementSibling;
                         if (!previousMessage) return null;
                     }
 
-                    console.log("🪫 previus message is LI");
+                    // console.log("🪫 previus message is LI");
                     message.style.border = "1px solid red";
                     return previousMessage;
                 } catch (err) {
-                    console.log("❌🪫 callback error");
+                    console.log("❌ [Fetching Previus Message] callback error");
                     return null;
                 }
             });
@@ -88,11 +88,10 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
         const deleteButtons = await message.$$(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh.dangerous-Y36ifs")
 
         if (!deleteButtons || deleteButtons.length == 0) {
-            console.log("⚠️ Not a message from the user, skipping...")
+            console.log(`⚠️ [${channelId}] Not a message from the user, skipping...`)
             await page.keyboard.up("ShiftLeft");
 
             const previousMessage = await getPreviouseMessage(message);
-            console.log("🚀 ~ file: deleteMessagesElementSibling.ts:88 ~ deleteMessagesElementSibling ~ previousMessage:", previousMessage)
 
             if (!previousMessage) {
                 message = null;
@@ -107,14 +106,12 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             const previousMessageY = previousMessageBoundingBox.y + previousMessageBoundingBox.height / 2
 
             const deltaHeight = messageY - previousMessageY
-            console.log("🚀 ~ file: deleteMessages.ts:95 ~ deleteMessages ~ deltaHeight:", deltaHeight)
 
             await page.evaluate((_deltaHeight) => {
                 const scroller = document.querySelector<HTMLElement>(".scroller-kQBbkU")
                 if (!scroller) return;
 
                 scroller.scrollBy(0, -_deltaHeight);
-                console.log(`⚪ ${_deltaHeight}`)
             }, deltaHeight)
 
             message = previousMessageHandleElement;
@@ -123,7 +120,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
 
         // While condition update
         const previousMessage = await getPreviouseMessage(message);
-        console.log("🚀 ~ file: deleteMessagesElementSibling.ts:119 ~ deleteMessagesElementSibling ~ previousMessage:", previousMessage)
 
         const deleteButtonsHandleElements = deleteButtons;
 
@@ -138,6 +134,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             await page.mouse.click(x, y);
             await page.keyboard.up("ShiftLeft");
             totalDeletedMessages++
+            console.log(`✅ [${channelId}] Succesfuly deleated the message`)
 
             const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
             const minMilliseconds = 1500
