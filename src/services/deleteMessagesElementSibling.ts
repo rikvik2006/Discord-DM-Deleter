@@ -26,8 +26,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
     const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms))
     await wait(5000)
 
-    await page.waitForSelector("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g");
-    await page.waitForSelector("div.message-2CShn3 div.contents-2MsGLg img.avatar-2e8lTP")
+    await page.waitForSelector("ol.scrollerInner-2PPAp2");
 
 
     let messages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
