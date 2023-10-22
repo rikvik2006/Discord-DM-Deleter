@@ -28,7 +28,6 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
 
     await page.waitForSelector("ol.scrollerInner-2PPAp2");
 
-
     let messages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
 
     if (!messages) {
@@ -134,6 +133,13 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             await page.keyboard.up("ShiftLeft");
             totalDeletedMessages++
             console.log(`✅ [${channelId}] Succesfuly deleated the message`)
+
+            await page.evaluate((_messageBoudingBox) => {
+                const scroller = document.querySelector<HTMLElement>(".scroller-kQBbkU")
+                if (!scroller) return;
+
+                scroller.scrollBy(0, -_messageBoudingBox.height);
+            }, messageBoudingBox)
 
             const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms));
             const minMilliseconds = 1500
