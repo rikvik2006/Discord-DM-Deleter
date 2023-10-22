@@ -13,12 +13,17 @@ This application allows you to delete direct messages (DMs) that you have sent t
 
 | Variable | Description |
 | --- | --- |
+| `INSTANCE_NAME` | The name of the instance. This is used to differentiate multiple instance that can be runned in parallel |
 | `DISCORD_USER_TOKEN` | The token of the Discord account that you want to delete DMs from. |
 | `USER_ID` | The ID of the user that you want to delete DMs from. |
 | `PRODUCTION` | Whether or not the application is running in production. |
 | `EXECUTABLE_PATH` | The path to the executable of the browser that you want to use. |
 | `USER_DATA_DIR` | The path to the user data directory of the browser that you want to use. |
-| `EXCLUDE_CHANNELS_IDS` | The IDs of the DM channels that you want to exclude from deletion. |
+| `EXCLUDE_CHANNELS_IDS` | The IDs of the DM channels that you want to exclude from deletion. Separate with comma (",") |
+| `SELECT_CHANNELS_IDS` | If you want to delete only some channels. Separate with comma (",") |
+| `START_LOGS_WEBHOOK` | The URL of the webhook that you want to send start logs to. |
+| `ERROR_LOGS_WEBHOOK` | The URL of the webhook that you want to send error logs to. |
+| `STATS_LOGS_WEBHOOK` | The URL of the webhook that you want to send stats logs to. |
 
 #### Executable Paths and User Data Directories
 
@@ -38,7 +43,7 @@ To start the application, run `npm start` or `pnpm dev`.
 
 ### Deleting DMs
 
-Keep your terminal open until the application has finished deleting DMs. Closing the terminal will stop the application from deleting DMs. 
+Keep your terminal open until the application has finished deleting DMs. Closing the terminal will stop the application from deleting DMs.
 If the application is in production the browser will be hidden, otherwise the browser will be visible.
 
 When the application finishes deleting DMs, the terminal will stop the process.
