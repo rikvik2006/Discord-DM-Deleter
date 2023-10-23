@@ -5,6 +5,8 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
     const userId = process.env.USER_ID
     let totalDeletedMessages = 0
 
+    page.setViewport({ width: 2560, height: 1440 })
+
     await installMouseHelper(page);
 
     await page.waitForSelector(".childWrapper-1j_1ub");

@@ -45,6 +45,7 @@ export const createBrowser = async () => {
             userDataDir: userDataDir,
             headless: isProduction ? "new" : false,
             devtools: !isProduction,
+            defaultViewport: null,
         })
 
         const page = await browser.newPage();
