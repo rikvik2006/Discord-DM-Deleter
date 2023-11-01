@@ -2,7 +2,7 @@ import { Page } from "puppeteer";
 
 export const loginToDiscord = async (page: Page, token: string) => {
     await page.goto("https://discord.com/login");
-    await page.waitForSelector(".wrapper-1f5byN")
+    await page.waitForSelector(".wrapper__2d9b1")
 
     await page.evaluate((_token) => {
         setInterval(() => {

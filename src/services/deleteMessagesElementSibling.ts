@@ -9,7 +9,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
 
     await installMouseHelper(page);
 
-    await page.waitForSelector(".childWrapper-1j_1ub");
+    await page.waitForSelector(".childWrapper__01b9c");
 
     if (!channelId) {
         throw new Error("You need to specify some DM chat where delete messages")
@@ -23,14 +23,14 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
         location.assign(`https://discord.com/channels/@me/${_channelId}`)
     }, channelId)
 
-    await page.waitForSelector(".childWrapper-1j_1ub");
+    await page.waitForSelector(".childWrapper__01b9c");
 
     const wait = (ms: number) => new Promise(resolve => setTimeout(() => resolve("Ok"), ms))
     await wait(5000)
 
-    await page.waitForSelector("ol.scrollerInner-2PPAp2");
+    await page.waitForSelector("ol.scrollerInner__059a5");
 
-    let messages = await page.$$("ol.scrollerInner-2PPAp2 li.messageListItem-ZZ7v6g")
+    let messages = await page.$$("ol.scrollerInner__059a5 li.messageListItem__6a4fb")
 
     if (!messages) {
         throw new Error("User messages array is null");
@@ -85,7 +85,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
         const noise = Math.round(Math.random() * 5)
         await page.mouse.move(messageX + noise, messageY)
         await page.mouse.move(messageX - noise, messageY);
-        const deleteButtons = await message.$$(".buttonContainer-1502pf .buttons-3dF5Kd div.buttonsInner-1ynJCY div.button-3bklZh.dangerous-Y36ifs")
+        const deleteButtons = await message.$$(".buttonContainer_dd4b62 .buttons__3766a div.buttonsInner_bca8fa div.button_d553e5.dangerous_b60ec0")
 
         if (!deleteButtons || deleteButtons.length == 0) {
             console.log(`⚠️ [${channelId}] Not a message from the user, skipping...`)
@@ -108,7 +108,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             const deltaHeight = messageY - previousMessageY
 
             await page.evaluate((_deltaHeight) => {
-                const scroller = document.querySelector<HTMLElement>(".scroller-kQBbkU")
+                const scroller = document.querySelector<HTMLElement>(".scroller__1f96e")
                 if (!scroller) return;
 
                 scroller.scrollBy(0, -_deltaHeight);
@@ -137,7 +137,7 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
             console.log(`✅ [${channelId}] Succesfuly deleated the message`)
 
             await page.evaluate((_messageBoudingBox) => {
-                const scroller = document.querySelector<HTMLElement>(".scroller-kQBbkU")
+                const scroller = document.querySelector<HTMLElement>(".scroller__1f96e")
                 if (!scroller) return;
 
                 scroller.scrollBy(0, -_messageBoudingBox.height);
