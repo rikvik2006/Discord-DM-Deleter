@@ -9,6 +9,10 @@ This application allows you to delete direct messages (DMs) that you have sent t
 3. Copy the contents of `.env.example` into a new file named `.env`.
 4. Fill in the necessary values in `.env`.
 
+## ⚠️ Warning
+
+Due to Discord updates, this application can stop working at any time. If you encounter any problems, please open an issue.
+
 ### Environment Variables
 
 | Variable | Description |
