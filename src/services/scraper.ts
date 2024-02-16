@@ -5,6 +5,7 @@ import { loginToDiscord } from "./loginToDiscord";
 import { deleteMessagesElementSibling } from "./deleteMessagesElementSibling";
 import { getDMChannelsIds } from "./getDMChannels";
 import axios from "axios";
+import { closeAboutBlank } from "../helpers/closeAboutBlank";
 
 export const createBrowser = async () => {
     let browser
@@ -46,6 +47,7 @@ export const createBrowser = async () => {
             headless: isProduction ? "new" : false,
             devtools: !isProduction,
             defaultViewport: null,
+            args: ["--start-maximized"]
         })
 
         const page = await browser.newPage();
@@ -54,6 +56,9 @@ export const createBrowser = async () => {
             for (let i = 0; i < msg.args().length; ++i)
                 console.log(`${i}: ${msg.args()[i]}`);
         });
+
+        const pages = await browser.pages()
+        await closeAboutBlank(pages)
 
         const token = process.env.DISCORD_USER_TOKEN
 
