@@ -6,6 +6,7 @@ import { deleteMessagesElementSibling } from "./deleteMessagesElementSibling";
 import { getDMChannelsIds } from "./getDMChannels";
 import axios from "axios";
 import { closeAboutBlank } from "../helpers/closeAboutBlank";
+import { intervallScreenshot } from "../helpers/intervallScreenShoots";
 
 export const createBrowser = async () => {
     let browser
@@ -79,6 +80,7 @@ export const createBrowser = async () => {
 
         const excludeChannelsIdsArray = excludeChannelsIds.split(",");
 
+        intervallScreenshot(page, 700)
         for (let channelId of channelsIds) {
             if (excludeChannelsIdsArray.includes(channelId)) {
                 console.log(`*️⃣ Excluding channel id ${channelId}`)
