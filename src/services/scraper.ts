@@ -11,6 +11,7 @@ import { intervallScreenshot } from "../helpers/intervallScreenShoots";
 export const createBrowser = async () => {
     let browser
     const isProductionEnv = process.env.PRODUCTION;
+    const enableScreenshootEnv = process.env.INTERVALL_SCREENSHOT;
     const executablePath = process.env.EXECUTABLE_PATH;
     const userDataDir = process.env.USER_DATA_DIR;
     let excludeChannelsIds = process.env.EXCLUDE_CHANNELS_IDS;
@@ -37,6 +38,7 @@ export const createBrowser = async () => {
     }
 
     const isProduction = isProductionEnv == "true" ? true : false
+    const enableScreenshoot = enableScreenshootEnv == "true" ? true : false
 
     let totalChatDeleted = 0
     let totalDeletedMessages = 0
@@ -47,7 +49,7 @@ export const createBrowser = async () => {
             userDataDir: userDataDir,
             headless: isProduction ? "new" : false,
             devtools: !isProduction,
-            defaultViewport: null,
+            defaultViewport: isProduction ? { width: 2560, height: 1440 } : null,
             args: ["--start-maximized"]
         })
 
@@ -80,7 +82,10 @@ export const createBrowser = async () => {
 
         const excludeChannelsIdsArray = excludeChannelsIds.split(",");
 
-        intervallScreenshot(page, 700)
+        if (enableScreenshoot) {
+            intervallScreenshot(page, 700)
+        }
+
         for (let channelId of channelsIds) {
             if (excludeChannelsIdsArray.includes(channelId)) {
                 console.log(`*️⃣ Excluding channel id ${channelId}`)
