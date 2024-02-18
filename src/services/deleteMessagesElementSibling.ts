@@ -1,11 +1,20 @@
 import { ElementHandle, JSHandle, Page } from "puppeteer";
 import { installMouseHelper } from "../helpers/installMouseHelper";
 
+declare global {
+    interface CSSStyleDeclaration {
+        zoom: number;
+    }
+}
+
 export const deleteMessagesElementSibling = async (page: Page, channelId: string): Promise<number> => {
     const userId = process.env.USER_ID
     let totalDeletedMessages = 0
 
-    page.setViewport({ width: 2560, height: 1440 })
+    // page.setViewport({ width: 2560, height: 1440 })
+    await page.evaluate((zoom: number) => {
+        document.body.style.zoom = zoom
+    }, 0.8)
 
     await installMouseHelper(page);
 
@@ -44,6 +53,10 @@ export const deleteMessagesElementSibling = async (page: Page, channelId: string
     let message: ElementHandle<HTMLLIElement> | null = messages[0]
     while (message) {
         const getPreviouseMessage = async (message: ElementHandle<HTMLLIElement>): Promise<ElementHandle<HTMLLIElement> | null> => {
+            /* IMPORTANT: Whe use evaluateHandle, sice we are returning a DOM Node (Element). evaluate by default if the returned element is a primitive type, it gets automatically converted by Puppeteer to a primitive type in the script context. 
+            If the script returns an object, Puppeteer serializes it to a JSON and reconstructs it on the script side. This process might not always yield correct results, for example, when you return a DOM node
+            In other words all data returned by evaluate get converted to string, and after get converted by Puppetear into primitive type or object. For this reason you can't return DOM Node with evaluate
+            */
             const previousMessage: ElementHandle<Element> | JSHandle<null> = await message.evaluateHandle((message: HTMLLIElement) => {
                 try {
                     let previousMessage = message.previousElementSibling;
