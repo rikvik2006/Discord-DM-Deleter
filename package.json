@@ -1,6 +1,6 @@
 {
   "name": "discord-dm-deleter",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A program that allow you to delete all the messages that you send to some user in Direct Messages. For Discord.",
   "main": "./dist/index.js",
   "scripts": {
