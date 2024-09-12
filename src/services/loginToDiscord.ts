@@ -2,19 +2,23 @@ import { Page } from "puppeteer";
 
 export const loginToDiscord = async (page: Page, token: string) => {
     await page.goto("https://discord.com/login");
-    await page.waitForSelector(".wrapper__2d9b1")
+    await page.waitForSelector(".centeringWrapper_b83a05");
 
     await page.evaluate((_token) => {
         setInterval(() => {
-            const iframe = document.createElement("iframe")
-            document.body.appendChild(iframe)
-            const contentWindow = iframe.contentWindow
+            const iframe = document.createElement("iframe");
+            document.body.appendChild(iframe);
+            const contentWindow = iframe.contentWindow;
             if (!contentWindow) {
-                throw new Error("Can't login to discord iframe content window is unaccesible")
+                throw new Error(
+                    "Can't login to discord iframe content window is unaccesible"
+                );
             }
 
-            contentWindow.localStorage.token = `"${_token}"`
+            contentWindow.localStorage.token = `"${_token}"`;
         }, 50);
-        setTimeout(() => { location.reload(); }, 2500);
-    }, token)
-}
+        setTimeout(() => {
+            location.reload();
+        }, 2500);
+    }, token);
+};
