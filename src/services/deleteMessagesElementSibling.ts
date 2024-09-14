@@ -82,7 +82,7 @@ export const deleteMessagesElementSibling = async (
                         }
 
                         // console.log("🪫 previus message is LI");
-                        message.style.border = "1px solid red";
+                        // message.style.border = "1px solid red";
                         return previousMessage;
                     } catch (err) {
                         console.log(
@@ -108,6 +108,7 @@ export const deleteMessagesElementSibling = async (
         await page.mouse.move(messageX, messageY);
         await wait(250); // Adding some delay to give time to discord to register the hover event
         await page.keyboard.down("ShiftLeft");
+        await wait(100);
 
         // Add some orizzontal noise to the mouse pointer
         const noise = Math.round(Math.random() * 5);
@@ -145,7 +146,7 @@ export const deleteMessagesElementSibling = async (
 
             await page.evaluate((_deltaHeight) => {
                 const scroller =
-                    document.querySelector<HTMLElement>(".scroller__1f96e");
+                    document.querySelector<HTMLElement>(".scroller_e2e187");
                 if (!scroller) return;
 
                 scroller.scrollBy(0, -_deltaHeight);
@@ -171,6 +172,7 @@ export const deleteMessagesElementSibling = async (
 
             await page.mouse.move(x, y);
             await page.mouse.click(x, y);
+            await wait(250);
             await page.keyboard.up("ShiftLeft");
             totalDeletedMessages++;
             console.log(`✅ [${channelId}] Succesfuly deleated the message`);
@@ -183,8 +185,6 @@ export const deleteMessagesElementSibling = async (
                 scroller.scrollBy(0, -_messageBoudingBox.height);
             }, messageBoudingBox);
 
-            const wait = (ms: number) =>
-                new Promise((resolve) => setTimeout(() => resolve("Ok"), ms));
             const minMilliseconds = 1500;
             const maxMilliseconds = 10000;
             const milliseconds =
