@@ -3,7 +3,7 @@ import { installMouseHelper } from "../helpers/installMouseHelper";
 
 declare global {
     interface CSSStyleDeclaration {
-        zoom: number;
+        zoom: string;
     }
 }
 
@@ -15,9 +15,9 @@ export const deleteMessagesElementSibling = async (
     let totalDeletedMessages = 0;
 
     // page.setViewport({ width: 2560, height: 1440 })
-    await page.evaluate((zoom: number) => {
+    await page.evaluate((zoom: string) => {
         document.body.style.zoom = zoom;
-    }, 0.8);
+    }, "0.8");
 
     await installMouseHelper(page);
 
@@ -177,7 +177,7 @@ export const deleteMessagesElementSibling = async (
 
             await page.evaluate((_messageBoudingBox) => {
                 const scroller =
-                    document.querySelector<HTMLElement>(".scroller__1f96e");
+                    document.querySelector<HTMLElement>(".scroller_e2e187");
                 if (!scroller) return;
 
                 scroller.scrollBy(0, -_messageBoudingBox.height);
